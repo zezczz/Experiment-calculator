@@ -1,1 +1,35 @@
-/Experiment data compute/__pycache__/
+# 字节码和编译文件 (Bytecode and compiled files)
+__pycache__/
+*.py[cod]
+*.cpython-*.so
+*$py.class
+
+# 虚拟环境 (Virtual environments)
+venv/
+virtualenv/
+ENV/
+env/
+.venv/
+
+# IDE 和编辑器配置 (IDE and editor configuration)
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 操作系统生成的文件 (OS generated files)
+.DS_Store
+Thumbs.db
+
+# 依赖管理 (Dependency management)
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+.eggs/
+
+# 配置文件（如果包含敏感信息）
+# .env
+# config.ini
+
+# 你自己的实验数据文件夹 (Your own experiment data folder)
+/Experiment data compute/
