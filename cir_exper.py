@@ -29,6 +29,10 @@ CALCULATOR_SYMBOLS = {
 
 CALCULATOR_OPERATORS = {
     '+': {'template': '({left} + {right})', 'prec': 1},   # 串联电阻
+    '-': {'template': '({left} - {right})', 'prec': 1},   # 减法
+    '*': {'template': '({left} * {right})', 'prec': 2},   # 乘法
+    '/': {'template': '({left} / {right})', 'prec': 2},   # 除法
+    '^': {'template': '({left} ** {right})', 'prec': 3},  # 幂运算
     '|': {'template': 'quick_parrel({left}, {right})', 'prec': 2},  # 并联电阻
     '%': {'template': 'epercent({left}, {right})', 'prec': 3},      # 百分比误差
 }
