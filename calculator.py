@@ -4,10 +4,74 @@
 提供Calculator类，支持电路计算、误差分析等功能。
 包含交互式命令行界面，支持变量定义、单位后缀、自定义运算符等高级功能。
 """
+import sys
+import tty
+import termios
 import re
-import readline  # 导入readline可以改善输入体验，如支持历史记录
 from circuits import *
 from factors import *
+
+
+class Remap:
+    def __init__(self, remapkeys: dict):
+        self.remapkeys = remapkeys
+
+    def get_remapped_input(self, prompt: str) -> str:
+        """
+        一个自定义的输入函数，可以实时转译按键。
+        它会接管终端，进入原始模式来读取单个字符。
+        """
+       
+        
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
+        
+        # 获取标准输入的终端文件描述符
+        fd = sys.stdin.fileno()
+        # 保存原始的终端设置，以便程序退出时恢复
+        old_settings = termios.tcgetattr(fd)
+        
+        try:
+            # 将终端设置为原始模式
+            tty.setraw(sys.stdin.fileno())
+            
+            line_buffer = []
+            while True:
+                # 读取一个字符
+                char = sys.stdin.read(1)
+                
+                # 检查是否是回车键 (Enter)
+                if char == '\r' or char == '\n':
+                    sys.stdout.write('\n')
+                    sys.stdout.flush()
+                    break
+                # 检查是否是 Ctrl+C (中断) 或 Ctrl+D (文件结束)
+                elif char == '\x03' or char == '\x04':
+                    # 恢复终端并抛出相应的异常
+                    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+                    if char == '\x03': raise KeyboardInterrupt()
+                    if char == '\x04': raise EOFError()
+                # 检查是否是退格键
+                elif char == '\x7f': # Backspace in raw mode
+                    if line_buffer:
+                        line_buffer.pop()
+                        # \b: 光标左移, ' ': 打印空格覆盖, \b: 光标再次左移
+                        sys.stdout.write('\b \b')
+                        sys.stdout.flush()
+                else:
+                    # 【关键】执行按键转译
+                    display_char = self.remapkeys.get(char, char)
+                    line_buffer.append(display_char)
+                    
+                    # 回显转译后的字符
+                    sys.stdout.write(display_char)
+                    sys.stdout.flush()
+        finally:
+            # 【极其重要】无论发生什么，都必须恢复终端的原始设置
+            # 否则你的终端会停留在原始模式，无法正常使用！
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            
+        return "".join(line_buffer)
 
 
 class Calculator:
@@ -21,7 +85,7 @@ class Calculator:
     - 交互式命令行界面
     """
     
-    def __init__(self, symbols=None, operators=None, suffixes=None):
+    def __init__(self, symbols=None, operators=None, suffixes=None, remap=None):
         """初始化计算器
         
         Args:
@@ -52,6 +116,9 @@ class Calculator:
             'G': 1e9, 'M': 1e6, 'k': 1e3,      # 大单位
             'm': 1e-3, 'u': 1e-6, 'n': 1e-9    # 小单位
         }
+
+        # 按键转译映射
+        self.remap = remap
 
     def _expand_suffixes(self, expr: str) -> str:
         """预处理器：展开数字后面的单位后缀
@@ -180,7 +247,10 @@ class Calculator:
                 # 组合执行环境，优先使用会话变量
                 eval_env = {**self.symbols, **self.session_vars}
                 
-                expr_input = input(">>> ")
+                if self.remap:
+                    expr_input = self.remap.get_remapped_input(">>> ")
+                else:
+                    expr_input = input(">>> ")
                 if expr_input.strip().lower() == 'exit':
                     break
 
