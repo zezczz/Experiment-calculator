@@ -238,7 +238,7 @@ class Calculator:
         print("  💾 变量存储: result = 10k | 20k")
         print()
         print("🎯 设计亮点: | 运算符让并联计算更直观，无需创建对象!")
-        print("⏰ 退出方式: 输入 'exit' 或按 Ctrl+D")
+        print("⏰ 退出方式: 输入 'exit' 或按 Ctrl-D(Linux,macOS), Ctrl-Z+enter (Windows)")
         print("=" * 60)
         print()
         

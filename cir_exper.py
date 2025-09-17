@@ -57,7 +57,7 @@ Goodbye!
 >>> *2
 
 
-2""
+2"""
 from calculator import * 
 from circuits import Resistor, quick_parrel
 from factors import epercent
